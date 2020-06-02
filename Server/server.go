@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"fmt"
 )
 
 func main() {
@@ -23,8 +24,8 @@ func HiServer(w http.ResponseWriter, r *http.Request) {
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
-				w.Write([]byte(ipnet.IP.String()))
-
+				//w.Write([]byte(ipnet.IP.String()))
+				fmt.Fprintf(w, ipnet.IP.String())
 			}
 		}
 	}
