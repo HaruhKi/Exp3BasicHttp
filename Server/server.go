@@ -1,27 +1,32 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"net/http"
+	"os"
 )
 
 func main() {
 
 	http.HandleFunc("/hi", HiServer)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":9000", nil)
 }
 
 func HiServer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Hello", "BasicHTTP!")
 
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	userIP := net.ParseIP(ip)
-	if userIP == nil {
-		//return nil, fmt.Errorf("userip: %q is not IP:port", req.RemoteAddr)
-		fmt.Fprintf(w, "userip: %q is not IP:port", r.RemoteAddr)
-		return
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		os.Stderr.WriteString("Oops: " + err.Error() + "\n")
+		os.Exit(1)
+	}
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				w.Write([]byte(ipnet.IP.String()))
+
+			}
+		}
 	}
 
-	w.Write([]byte(net.ParseIP(ip)))
 }
